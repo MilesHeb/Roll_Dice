@@ -1,0 +1,3 @@
+dependencies:
+  # Same LVGL version LilyGO's Arduino demo ships with
+  lvgl/lvgl: "8.3.11"

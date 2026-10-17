@@ -1,0 +1,18 @@
+# Text files: normalise line endings in the repo
+* text=auto
+
+# LabVIEW files are binary: never diff as text, never merge, never touch line endings
+*.vi      binary
+*.vit     binary
+*.vim     binary
+*.ctl     binary
+*.ctt     binary
+*.lvlib   binary
+*.lvclass binary
+*.lvproj  binary
+*.llb     binary
+*.xctl    binary
+
+# Firmware binaries
+*.bin     binary
+*.elf     binary

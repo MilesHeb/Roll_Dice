@@ -1,0 +1,26 @@
+# ---------- ESP-IDF firmware ----------
+firmware/build/
+firmware/managed_components/
+firmware/sdkconfig.old
+
+# ---------- VS Code (machine-specific: absolute paths, COM port) ----------
+.vscode/
+firmware/.vscode/
+
+# ---------- LabVIEW ----------
+# Per-user project window state
+*.lvlps
+# Machine-specific target aliases
+*.aliases
+# Build outputs (Application Builder)
+labview/builds/
+*.exe
+
+# ---------- Python ----------
+__pycache__/
+*.pyc
+
+# ---------- OS ----------
+Thumbs.db
+Desktop.ini
+.DS_Store
