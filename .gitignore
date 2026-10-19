@@ -2,6 +2,9 @@
 firmware/build/
 firmware/managed_components/
 firmware/sdkconfig.old
+# Created by the ESP-IDF extension if the repo root is opened instead of firmware/
+/build/
+.clangd
 
 # ---------- VS Code (machine-specific: absolute paths, COM port) ----------
 .vscode/
@@ -10,6 +13,7 @@ firmware/.vscode/
 # ---------- LabVIEW ----------
 # Per-user project window state
 *.lvlps
+.*.UserState/
 # Machine-specific target aliases
 *.aliases
 # Build outputs (Application Builder)

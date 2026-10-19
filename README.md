@@ -13,10 +13,19 @@ displayed with LVGL and streamed to LabVIEW over USB serial.
 - **Display**: LVGL 8.3 bar charts of each face's share of rolls, converging
   to 16.7%, plus per-core CPU load.
 
+## Opening in VS Code
+
+Open **`Roll_Dice.code-workspace`** (File > Open Workspace from File...), not
+the repo folder. The ESP-IDF extension treats a workspace folder as the
+project, so the workspace lists `firmware/` as its own folder (first, so it's
+the default for Build / Flash / Monitor / Set Target), plus `labview/` and the
+repo root. Opening the repo folder directly makes Set Target and Build fail,
+because there is no `CMakeLists.txt` at the root.
+
 ## Layout
 
 ```
-firmware/   ESP-IDF v6.1 project (open this folder in VS Code)
+firmware/   ESP-IDF v6.1 project
 labview/    LabVIEW project (.lvproj), SubVIs/, Controls/ (typedefs)
 tools/      serial_test.py - exercise the serial protocol without LabVIEW
 docs/       protocol.md - the serial command contract between both sides
@@ -32,7 +41,7 @@ idf.py build
 idf.py -p COM20 flash monitor
 ```
 
-Or open `firmware/` in VS Code with the ESP-IDF extension and use the status bar
+Or open `Roll_Dice.code-workspace` in VS Code and use the ESP-IDF status bar
 Build / Flash / Monitor buttons. LVGL 8.3.11 is fetched by the component manager
 on the first build (pinned in `dependencies.lock`).
 

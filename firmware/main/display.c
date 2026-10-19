@@ -50,10 +50,23 @@ void display_init(void)
     lv_disp_drv_register(&disp_drv);
 }
 
-void display_run(void)
+// LVGL 8 renders in a single loop, so its work can't be split across both
+// cores at once. What we can do is not tie it to one: the task is created with
+// tskNO_AFFINITY, so the scheduler runs it on whichever core is free at each
+// context switch, instead of always adding the drawing load to Core 0 (where
+// app_main, and so the old loop, was pinned).
+// This is the only task that touches LVGL, so no LVGL locking is needed.
+static void lvgl_task(void *arg)
 {
     while (1) {
         lv_timer_handler();
         vTaskDelay(pdMS_TO_TICKS(2));
     }
+}
+
+void display_start(void)
+{
+    BaseType_t ok = xTaskCreatePinnedToCore(lvgl_task, "lvgl", DISPLAY_TASK_STACK, NULL,
+                                            DISPLAY_TASK_PRIORITY, NULL, tskNO_AFFINITY);
+    configASSERT(ok == pdPASS);
 }

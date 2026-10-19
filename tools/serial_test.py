@@ -1,6 +1,9 @@
 """Quick check of the Dice_Roll serial protocol before connecting LabVIEW.
 
-Usage (close VS Code's ESP-IDF monitor first - only one program can open the port):
+Sends "R" 60 times and prints the rolls plus a text histogram - the same job
+the LabVIEW VI does - then checks the other commands.
+
+Usage (close VS Code's ESP-IDF monitor and any LabVIEW VI using the port first):
     python tools/serial_test.py COM20
 """
 import sys
@@ -9,9 +12,7 @@ import time
 import serial  # pyserial (included in the ESP-IDF Python environment)
 
 PORT = sys.argv[1] if len(sys.argv) > 1 else "COM20"
-
-# Replies start with one of these; anything else on the port is ESP_LOG output
-REPLY_PREFIXES = ("PONG", "ROLL", "STATS", "OK", "CPU", "ERR")
+ROLLS = 60
 
 # Leave DTR/RTS low: toggling them on the ESP32-S3 USB port can reset the chip
 with serial.Serial() as s:
@@ -22,24 +23,27 @@ with serial.Serial() as s:
     s.rts = False
     s.open()
     time.sleep(0.2)
-    s.reset_input_buffer()
+    s.reset_input_buffer()  # drop any boot messages
 
     def ask(cmd):
         s.write((cmd + "\n").encode())
-        deadline = time.time() + 2
-        while time.time() < deadline:
-            line = s.readline().decode(errors="replace").strip()
-            if line.startswith(REPLY_PREFIXES):
-                print(f"{cmd:<6} -> {line}")
-                return line
-            if line:
-                print(f"         (log) {line}")
-        print(f"{cmd:<6} -> no reply")
-        return None
+        return s.readline().decode(errors="replace").strip() or None
 
-    ask("PING")
-    for _ in range(3):
-        ask("ROLL")
-    ask("STATS")
-    ask("CPU")
-    ask("BOGUS")
+    print(f"PING   -> {ask('PING')}")
+
+    counts = [0] * 6
+    rolls = []
+    for _ in range(ROLLS):
+        reply = ask("R")
+        if reply is None or not reply.isdigit() or not 1 <= int(reply) <= 6:
+            print(f"R      -> unexpected reply: {reply!r}")
+            sys.exit(1)
+        rolls.append(int(reply))
+        counts[int(reply) - 1] += 1
+    print(f"R x{ROLLS} -> {' '.join(map(str, rolls))}")
+    for face, n in enumerate(counts, start=1):
+        print(f"  {face}: {'#' * n} {n}")
+
+    print(f"STATS  -> {ask('STATS')}")
+    print(f"CPU    -> {ask('CPU')}")
+    print(f"BOGUS  -> {ask('BOGUS')}")

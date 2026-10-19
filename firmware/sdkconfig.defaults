@@ -26,3 +26,7 @@ CONFIG_LV_FONT_MONTSERRAT_20=y
 # CPU usage per core (FreeRTOS run-time stats, 64-bit counter so it doesn't wrap)
 CONFIG_FREERTOS_GENERATE_RUN_TIME_STATS=y
 CONFIG_FREERTOS_RUN_TIME_COUNTER_TYPE_U64=y
+
+# USB Serial/JTAG (COM port) carries only the LabVIEW protocol: no log output on it.
+# Logs still go to UART0 (GPIO43/44).
+CONFIG_ESP_CONSOLE_SECONDARY_NONE=y

@@ -13,37 +13,44 @@ the LabVIEW VI. Change both sides in the same commit.
 | Termination | Every command and reply ends with `\n` (0x0A). `\r` and `\r\n` also accepted on input |
 | Case | Commands are case-insensitive |
 
-The same port also carries the firmware's `ESP_LOG` output (lines starting
-with `I (`, `W (`, `E (`). Read lines until one starts with a reply prefix
-below and discard the rest. Flush the input buffer after opening the port.
+The port carries **protocol traffic only**: the firmware's `ESP_LOG` output is
+kept off USB (`CONFIG_ESP_CONSOLE_SECONDARY_NONE`, logs go to UART0). So the
+line read after sending a command is always that command's reply. Flush the
+input buffer once after opening the port, in case the chip's boot messages
+are still waiting there.
 
-## Commands
+## The command LabVIEW uses
 
 | Send | Reply | Notes |
 |---|---|---|
-| `PING` | `PONG,Dice_Roll` | Connection check |
-| `ROLL` | `ROLL,<seq>,<trng>,<prng>` | Releases the cached TRNG + PRNG pair (1-6 each); the cache rerolls immediately. `seq` increases by 1 per pair |
-| `STATS` | `STATS,<T total>,<T1>,<T2>,<T3>,<T4>,<T5>,<T6>,<P total>,<P1>,<P2>,<P3>,<P4>,<P5>,<P6>` | Rolling counts from the Core 0 (TRNG) and Core 1 (PRNG) roller tasks |
-| `RESET` | `OK,RESET` | Zeroes both rolling counts |
+| `R` | `<roll>`, e.g. `4` | Releases the cached **true random** roll (1-6) and triggers the next one. LabVIEW: VISA Write `R` + Line Feed, one VISA Read, Decimal String To Number |
+
+`R` replies `ERR,CACHE_EMPTY` if the next roll isn't ready within 50 ms (it
+normally is ready in microseconds). Decimal String To Number turns any `ERR`
+reply into 0, so LabVIEW can treat 0 as "no roll".
+
+## Other commands (testing and the on-board demo)
+
+| Send | Reply | Notes |
+|---|---|---|
+| `PING` | `PONG` | Connection check |
+| `STATS` | `STATS,<T total>,<T1>..<T6>,<P total>,<P1>..<P6>` | Counts from the on-board Core 0 (TRNG) and Core 1 (PRNG) roller tasks shown on the AMOLED. Independent of `R` |
+| `RESET` | `OK,RESET` | Zeroes the on-board roller counts |
 | `CPU` | `CPU,<core0 %>,<core1 %>` | Per-core load, one decimal, e.g. `CPU,12.3,4.0` |
 | anything else | `ERR,UNKNOWN,<command>` | |
 | line > 32 chars | `ERR,TOO_LONG` | |
 
-`ROLL` can also reply `ERR,CACHE_EMPTY` if the next pair isn't ready within 50 ms.
-
 ## Example session
 
 ```
+> R
+< 4
+> R
+< 1
 > PING
-< PONG,Dice_Roll
-> ROLL
-< ROLL,1,4,2
-> ROLL
-< ROLL,2,6,1
-> STATS
-< STATS,1532,262,251,248,259,256,256,1532,255,258,252,254,256,257
+< PONG
 > CPU
-< CPU,23.4,6.1
+< CPU,18.2,21.7
 ```
 
 Test without LabVIEW: `python tools/serial_test.py COM20`

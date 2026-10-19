@@ -1,5 +1,5 @@
 // Dice_Roll: true vs. pseudo random dice rolls on the T-Display-S3 AMOLED,
-// streamed to LabVIEW over serial.
+// with the true random roll served to LabVIEW over serial.
 
 #include "dice_tasks.h"
 #include "dice_ui.h"
@@ -12,10 +12,11 @@ void app_main(void)
 {
     trng_init();
     display_init();
-    dice_ui_create();
+    dice_ui_create();   // build the UI before the LVGL task takes over
     dice_tasks_start();
     roll_cache_start();
     serial_link_start();
+    display_start();
 
-    display_run();
+    // Everything runs in its own task now; returning ends app_main's task
 }

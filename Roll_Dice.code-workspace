@@ -1,0 +1,20 @@
+{
+    // Open this file in VS Code (File > Open Workspace from File...) instead of
+    // the repo folder. The ESP-IDF extension treats a workspace folder as the
+    // project, so firmware/ has to be its own folder - and listed first, which
+    // makes it the default for Build / Flash / Monitor / Set Target.
+    // The repo root is deliberately NOT a folder here: it has no CMakeLists.txt,
+    // so the extension must never be able to pick it.
+    "folders": [
+        { "name": "firmware", "path": "firmware" },
+        { "name": "labview", "path": "labview" },
+        { "name": "docs", "path": "docs" },
+        { "name": "tools", "path": "tools" }
+    ],
+    "settings": {
+        // Source Control shows the one Roll_Dice repo for every folder
+        // (README.md, .gitignore etc. at the root appear there too)
+        "git.openRepositoryInParentFolders": "always",
+        "cmake.configureOnOpen": false
+    }
+}
